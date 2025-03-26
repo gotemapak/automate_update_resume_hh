@@ -1,56 +1,99 @@
-# HeadHunter Resume Auto-Updater
+# Автоматическое обновление резюме на HH.ru
 
-A Python script to automatically update your HeadHunter.ru resumes.
+[English version](README_EN.md)
 
-## Features
+🕒 Скрипт для автоматического обновления одного или нескольких резюме на hh.ru. Работает как локально, так и через GitHub Actions.
 
-- Automatic resume updates on HeadHunter.ru
-- OAuth2 authentication with refresh token support
-- Support for multiple resumes
-- Environment-based configuration
+---
 
-## Setup
+## 🚀 Возможности
+- Обновляет одно или несколько резюме с помощью [hh.ru API](https://github.com/hhru/api).
+- Поддерживает запуск каждые 4 часа через GitHub Actions.
+- Использует `.env` файл для безопасного хранения токенов и конфигурации.
+- Позволяет подставлять временный `access_token` вручную при локальном тестировании.
 
-1. Clone the repository:
-```bash
-git clone git@github.com:gotemapak/automate_update_resume_hh.git
-cd automate_update_resume_hh
+---
+
+## 🧰 Что нужно
+
+1. **Зарегистрируй приложение на hh.ru**  
+   https://dev.hh.ru/admin  
+   Получи `client_id` и `client_secret`.
+
+2. **Получить `refresh_token`**  
+   Сначала получаешь `code` через OAuth, затем обмениваешь его на `access_token` и `refresh_token`.
+
+3. **Узнать ID своих резюме**  
+   Выполни запрос `GET https://api.hh.ru/resumes/mine`, используя `access_token`.
+
+---
+
+## 🔐 Переменные окружения (.env)
+
+Создай `.env` файл рядом со скриптом и добавь:
+
+```
+HH_CLIENT_ID=твой_client_id
+HH_CLIENT_SECRET=твой_client_secret
+HH_REFRESH_TOKEN=твой_refresh_token
+HH_RESUME_IDS=resume_id1,resume_id2,resume_id3
+# Опционально, только для локального запуска:
+HH_ACCESS_TOKEN=временный_access_token
 ```
 
-2. Create and activate a virtual environment:
-```bash
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+---
+
+## 📆 GitHub Actions (если используешь)
+
+Файл `update_resume.yml` запускается:
+
+```yaml
+on:
+  schedule:
+    - cron: "0 */4 * * *"  # Каждые 4 часа
+  workflow_dispatch:       # Вручную
 ```
 
-3. Install dependencies:
+В GitHub → Settings → Secrets добавь:
+
+| Название              | Описание                        |
+|------------------------|---------------------------------|
+| `HH_CLIENT_ID`         | ID приложения                   |
+| `HH_CLIENT_SECRET`     | Секрет приложения               |
+| `HH_REFRESH_TOKEN`     | Токен обновления                |
+| `HH_RESUME_IDS`        | ID резюме через запятую         |
+
+---
+
+## 💻 Как запустить локально
+
+1. Создай виртуальное окружение:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate  # или .\venv\Scripts\activate на Windows
+```
+
+2. Установи зависимости:
+
 ```bash
 pip install -r requirements.txt
 ```
 
-4. Create a `.env` file with your HeadHunter API credentials:
-```env
-HH_CLIENT_ID=your_client_id
-HH_CLIENT_SECRET=your_client_secret
-HH_REFRESH_TOKEN=your_refresh_token
-HH_ACCESS_TOKEN=your_access_token
-HH_RESUME_IDS=resume_id1,resume_id2
-```
+3. Создай `.env` файл, как указано выше.
 
-## Usage
+4. Запусти скрипт:
 
-Run the script to update your resumes:
 ```bash
 python update_resume.py
 ```
 
-## Getting API Credentials
+---
 
-1. Go to [HeadHunter Developer Portal](https://dev.hh.ru/)
-2. Create a new application
-3. Get your Client ID and Client Secret
-4. Follow the OAuth2 flow to get your refresh token
+## 🧪 Отладка вручную
 
-## License
+Если `refresh_token` ещё не истёк и HH возвращает `token not expired`, можно временно подставить `access_token` вручную через переменную `HH_ACCESS_TOKEN`.
 
-MIT 
+---
+
+Сделано с ❤️ чтобы твоё резюме всегда было наверху.
