@@ -8,6 +8,7 @@
 - Refreshes one or more resumes via [hh.ru API](https://github.com/hhru/api).
 - Can be run locally or scheduled to run every 4 hours via GitHub Actions.
 - Supports `.env` configuration for secure key management.
+- Sends notifications about update results to Telegram.
 
 ---
 
@@ -23,6 +24,11 @@
 3. **Resume IDs**  
    Get them via the `/resumes/mine` API endpoint after logging in with an `access_token`.
 
+4. **Set up Telegram Bot (Optional)**  
+   - Create a bot via [@BotFather](https://t.me/botfather)
+   - Get your `TG_BOT_TOKEN`
+   - Find your `TG_CHAT_ID` (you can use [@userinfobot](https://t.me/userinfobot))
+
 ---
 
 ## 🔐 Environment Variables
@@ -36,6 +42,10 @@ HH_REFRESH_TOKEN=your_refresh_token
 HH_RESUME_IDS=resume_id1,resume_id2,resume_id3
 # Optional fallback for local testing:
 HH_ACCESS_TOKEN=temporary_access_token
+
+# Optional, for Telegram notifications:
+TG_BOT_TOKEN=your_bot_token
+TG_CHAT_ID=your_chat_id
 ```
 
 ---
@@ -59,6 +69,8 @@ Secrets required in GitHub:
 | `HH_CLIENT_SECRET`  | Your app's client secret     |
 | `HH_REFRESH_TOKEN`  | OAuth refresh token          |
 | `HH_RESUME_IDS`     | Comma-separated resume IDs   |
+| `TG_BOT_TOKEN`      | Your Telegram bot token      |
+| `TG_CHAT_ID`        | Chat ID for notifications    |
 
 ---
 
