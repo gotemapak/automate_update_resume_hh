@@ -1,0 +1,29 @@
+name: Update HH Resume
+
+on:
+  schedule:
+    - cron: "0 */4 * * *"  # Запуск каждые 4 часа
+  workflow_dispatch:       # Возможность ручного запуска через интерфейс
+
+jobs:
+  update-resume:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run update script
+        env:
+          HH_CLIENT_ID: ${{ secrets.HH_CLIENT_ID }}
+          HH_CLIENT_SECRET: ${{ secrets.HH_CLIENT_SECRET }}
+          HH_REFRESH_TOKEN: ${{ secrets.HH_REFRESH_TOKEN }}
+          HH_RESUME_IDS: ${{ secrets.HH_RESUME_IDS }}
+          HH_ACCESS_TOKEN: ${{ secrets.HH_ACCESS_TOKEN }}
+        run: python update_resume.py
