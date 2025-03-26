@@ -25,10 +25,13 @@ def update_resume(token, resume_id):
     headers = {"Authorization": f"Bearer {token}"}
     response = requests.post(url, headers=headers)
     if response.status_code == 204:
-        print(f"✅ Resume {resume_id} updated successfully.")
+        msg = f"✅ Резюме {resume_id} обновлено успешно."
+        print(msg)
+        send_telegram_message(msg)
     else:
-        print(f"❌ Failed to update resume {resume_id}:")
-        print(response.status_code, response.text)
+        msg = f"❌ Ошибка при обновлении резюме {resume_id}: {response.status_code} {response.text}"
+        print(msg)
+        send_telegram_message(msg)
 
 if __name__ == "__main__":
     try:
@@ -46,3 +49,21 @@ if __name__ == "__main__":
         rid = rid.strip()
         if rid:
             update_resume(access_token, rid)
+
+
+def send_telegram_message(text):
+    token = os.getenv("TG_BOT_TOKEN")
+    chat_id = os.getenv("TG_CHAT_ID")
+
+    if not token or not chat_id:
+        print("ℹ️ Telegram переменные не заданы — пропускаем отправку.")
+        return
+
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    payload = {"chat_id": chat_id, "text": text}
+    try:
+        response = requests.post(url, data=payload)
+        if response.status_code != 200:
+            print("⚠️ Не удалось отправить сообщение в Telegram.")
+    except Exception as e:
+        print("⚠️ Ошибка при отправке в Telegram:", e)
