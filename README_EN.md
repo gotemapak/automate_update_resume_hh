@@ -1,16 +1,19 @@
-# HH Resume Updater
+# Automatic Resume Updater for HH.RU Website
 
 [Русская версия](README.md)
 
 🕒 Automatically updates your HeadHunter (hh.ru) resumes using GitHub Actions or a local script.
 
-## 🚀 Features
-- Refreshes one or more resumes via [hh.ru API](https://github.com/hhru/api).
-- Can be run locally or scheduled to run every 4 hours via GitHub Actions.
-- Supports `.env` configuration for secure key management.
-- Sends notifications about update results to Telegram.
+## 📝 Description
+A script that automates the process of updating your resume on HeadHunter.ru, helping to keep your resume at the top of search results. Supports both local execution and automated updates via GitHub Actions.
 
----
+## 🚀 Features
+- 🔄 Automatic resume updates via [hh.ru API](https://github.com/hhru/api)
+- ⏰ Runs every 4 hours via GitHub Actions
+- 🔐 Secure token storage in `.env` file
+- 🔑 OAuth2 support with refresh token
+- 📱 Telegram notifications for results
+- 🛠️ Local execution and debugging support
 
 ## 🧰 Requirements
 
@@ -29,30 +32,83 @@
    - Get your `TG_BOT_TOKEN`
    - Find your `TG_CHAT_ID` (you can use [@userinfobot](https://t.me/userinfobot))
 
----
+## 🚀 Quick Start
 
-## 🔐 Environment Variables
-
-Create a `.env` file with the following variables:
-
+### 1. Clone the Repository
+```bash
+git clone https://github.com/gotemapak/automate_update_resume_hh.git
+cd automate_update_resume_hh
 ```
+
+### 2. Install Dependencies
+```bash
+# Create virtual environment
+python3 -m venv venv
+
+# Activate it
+# For Windows:
+venv\Scripts\activate
+# For macOS/Linux:
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### 3. Set Up Environment Variables
+Create a `.env` file in the project root:
+```env
+# Required variables
 HH_CLIENT_ID=your_client_id
 HH_CLIENT_SECRET=your_client_secret
 HH_REFRESH_TOKEN=your_refresh_token
 HH_RESUME_IDS=resume_id1,resume_id2,resume_id3
-# Optional fallback for local testing:
+
+# Optional, for local testing
 HH_ACCESS_TOKEN=temporary_access_token
 
-# Optional, for Telegram notifications:
+# Optional, for Telegram notifications
 TG_BOT_TOKEN=your_bot_token
 TG_CHAT_ID=your_chat_id
 ```
 
----
+### 4. Run the Script
+```bash
+python resume_bot.py
+```
 
-## 📆 GitHub Actions Schedule
+## 🔍 Detailed Setup Guide
 
-The included GitHub workflow runs every 4 hours and can also be triggered manually.
+### 1. Getting HH.ru Tokens
+
+1. Go to [dev.hh.ru/admin](https://dev.hh.ru/admin)
+2. Create a new application
+3. Get your `client_id` and `client_secret`
+4. Add redirect URI to your app: `http://localhost:8080`
+5. Get the `code` via OAuth:
+   - Open in browser: `https://hh.ru/oauth/authorize?response_type=code&client_id=YOUR_CLIENT_ID&redirect_uri=http://localhost:8080`
+   - After authorization, you'll get the `code` in the URL
+6. Add the received `code` to `.env` as `HH_AUTH_CODE`
+7. Run the script - it will automatically get `access_token` and `refresh_token`
+
+### 2. Getting Resume IDs
+
+1. After getting `access_token`, run the script
+2. The console will show a list of your resumes with their IDs
+3. Copy the needed IDs to the `HH_RESUME_IDS` variable, separated by commas
+
+### 3. Setting Up Telegram Bot
+
+1. Find [@BotFather](https://t.me/botfather) in Telegram
+2. Send `/newbot` and follow the instructions
+3. Save the received token as `TG_BOT_TOKEN`
+4. Find [@userinfobot](https://t.me/userinfobot)
+5. Send it any message
+6. Save the received ID as `TG_CHAT_ID`
+
+## 📆 GitHub Actions (if using)
+
+The included workflow runs every 4 hours and can also be triggered manually:
 
 ```yaml
 on:
@@ -61,7 +117,7 @@ on:
   workflow_dispatch:
 ```
 
-Secrets required in GitHub:
+Required secrets in GitHub:
 
 | Secret Name         | Description                  |
 |---------------------|------------------------------|
@@ -72,37 +128,46 @@ Secrets required in GitHub:
 | `TG_BOT_TOKEN`      | Your Telegram bot token      |
 | `TG_CHAT_ID`        | Chat ID for notifications    |
 
----
-
-## 💻 Run Locally
-
-1. Create a virtual environment:
-
-```bash
-python3 -m venv venv
-source venv/bin/activate  # or .\venv\Scripts\activate on Windows
-```
-
-2. Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-3. Create a `.env` file (see example above).
-
-4. Run the script:
-
-```bash
-python update_resume.py
-```
-
----
-
-## 🧪 Optional Debug
+## 🧪 Manual Debugging
 
 If your `refresh_token` is still valid and you're getting a `token not expired` error,
 you can temporarily provide an `access_token` directly via `HH_ACCESS_TOKEN`.
+
+## 📱 Notification Examples
+
+### Successful Update
+```
+✅ Resume <b>123456</b> updated successfully.
+
+💼 Resume ID: <code>123456</code>
+
+🕒 Updated: 26.03.2024 16:45:30
+```
+
+### Update Error
+```
+❌ Error updating resume <b>123456</b>:
+
+💼 Resume ID: <code>123456</code>
+⚠️ Status: 400
+📝 Response: {"errors": [{"type": "error", "value": "Resume not found"}]}
+
+🕒 Updated: 26.03.2024 16:45:30
+```
+
+## ❓ Frequently Asked Questions
+
+### Q: How often is the resume updated?
+A: By default, every 4 hours via GitHub Actions. This matches HH.ru's free tier limitation - on a free account, you can only update your resume once every 4 hours. If you try to update it more frequently, HH.ru will return an error.
+
+### Q: Do I need to update tokens?
+A: The `refresh_token` is valid for 30 days. The script will automatically notify you when tokens need to be updated.
+
+### Q: Why isn't Telegram working?
+A: Check that:
+1. The bot is added to the chat
+2. The bot has permission to send messages
+3. `TG_BOT_TOKEN` and `TG_CHAT_ID` are correctly set
 
 ---
 
