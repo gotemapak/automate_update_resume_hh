@@ -64,7 +64,8 @@ HH_CLIENT_SECRET=your_client_secret
 HH_REFRESH_TOKEN=your_refresh_token
 HH_RESUME_IDS=resume_id1,resume_id2,resume_id3
 
-# Optional, for local testing
+# Recommended for reliability
+# Used when "token not expired" error occurs
 HH_ACCESS_TOKEN=temporary_access_token
 
 # Optional, for Telegram notifications
@@ -72,9 +73,17 @@ TG_BOT_TOKEN=your_bot_token
 TG_CHAT_ID=your_chat_id
 ```
 
+### Important Note About Tokens
+
+The HeadHunter API sometimes returns a `"token not expired"` error when trying to get a new access_token via a refresh_token if the previous token is still valid. In this case, the script will use `HH_ACCESS_TOKEN` from the environment variables.
+
+**Recommendations:**
+1. Obtain a valid access_token manually and add it to `.env` or GitHub secrets
+2. Update `HH_ACCESS_TOKEN` approximately once a week, as it has a limited lifetime
+
 ### 4. Run the Script
 ```bash
-python resume_bot.py
+python update_resume.py
 ```
 
 ## 🔍 Detailed Setup Guide
@@ -125,8 +134,16 @@ Required secrets in GitHub:
 | `HH_CLIENT_SECRET`  | Your app's client secret     |
 | `HH_REFRESH_TOKEN`  | OAuth refresh token          |
 | `HH_RESUME_IDS`     | Comma-separated resume IDs   |
+| `HH_ACCESS_TOKEN`   | Backup access token*         |
 | `TG_BOT_TOKEN`      | Your Telegram bot token      |
 | `TG_CHAT_ID`        | Chat ID for notifications    |
+
+\* Used when "token not expired" error occurs
+
+### ⚠️ Important
+- Adding `HH_ACCESS_TOKEN` is **mandatory** for correct functioning with GitHub Actions
+- Without this token, the script won't be able to update resumes if the API returns a "token not expired" error
+- It's recommended to update `HH_ACCESS_TOKEN` about once a week, as it has a limited validity period
 
 ## 🧪 Manual Debugging
 
@@ -161,13 +178,16 @@ you can temporarily provide an `access_token` directly via `HH_ACCESS_TOKEN`.
 A: By default, every 4 hours via GitHub Actions. This matches HH.ru's free tier limitation - on a free account, you can only update your resume once every 4 hours. If you try to update it more frequently, HH.ru will return an error.
 
 ### Q: Do I need to update tokens?
-A: The `refresh_token` is valid for 30 days. The script will automatically notify you when tokens need to be updated.
+A: The `refresh_token` is valid for 30 days. The script will automatically notify you when tokens need to be updated. It's advisable to update `HH_ACCESS_TOKEN` once a week.
 
 ### Q: Why isn't Telegram working?
 A: Check that:
 1. The bot is added to the chat
 2. The bot has permission to send messages
 3. `TG_BOT_TOKEN` and `TG_CHAT_ID` are correctly set
+
+### Q: Why do I get a "token not expired" error?
+A: The HeadHunter API won't issue a new access_token via refresh_token if the old token is still valid. In this case, the script automatically uses the `HH_ACCESS_TOKEN` from environment variables as a backup.
 
 ---
 
