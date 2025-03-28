@@ -65,11 +65,26 @@ def get_access_token():
         "client_secret": os.getenv("HH_CLIENT_SECRET")
     }
     response = requests.post(url, data=data)
+    
+    # Проверяем на ошибку "token not expired"
     if not response.ok:
-        print("⚠️ Не удалось получить access_token (возможно, он ещё не истёк)")
+        try:
+            error_data = response.json()
+            if error_data.get("error") == "invalid_grant" and "not expired" in error_data.get("error_description", ""):
+                print("ℹ️ API сообщает, что текущий токен ещё действителен - используем HH_ACCESS_TOKEN")
+                access_token = os.getenv("HH_ACCESS_TOKEN")
+                if access_token:
+                    return access_token
+                else:
+                    print("⚠️ HH_ACCESS_TOKEN не найден в переменных окружения")
+        except:
+            pass
+            
+        print("⚠️ Не удалось получить access_token через refresh_token")
         print("Статус:", response.status_code)
         print("Ответ:", response.text)
         raise Exception("Access token refresh failed.")
+    
     return response.json()["access_token"]
 
 def update_resume(token, resume_id):
@@ -88,12 +103,17 @@ def update_resume(token, resume_id):
 def update_resumes_if_possible():
     try:
         access_token = get_access_token()
-    except:
+    except Exception as e:
+        print(f"❌ Ошибка при получении access_token: {str(e)}")
         access_token = os.getenv("HH_ACCESS_TOKEN")
         if not access_token:
-            print("❌ Нет access_token и не удалось получить его через refresh_token.")
-            send_telegram_message("❌ Нет access_token и не удалось получить его через refresh_token.")
+            error_msg = "❌ Нет access_token и не удалось получить его через refresh_token."
+            print(error_msg)
+            send_telegram_message(error_msg)
             return
+        else:
+            print("🔑 Используем резервный HH_ACCESS_TOKEN из переменных окружения")
+    
     resume_ids = os.getenv("HH_RESUME_IDS")
     if not resume_ids:
         print("❌ Переменная HH_RESUME_IDS не найдена.")
