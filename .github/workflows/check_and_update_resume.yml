@@ -46,7 +46,11 @@ jobs:
                   print('ℹ️ Telegram переменные не заданы — пропускаем отправку.')
                   return
               url = f'https://api.telegram.org/bot{token}/sendMessage'
-              payload = {'chat_id': chat_id, 'text': text}
+              payload = {
+                  'chat_id': chat_id, 
+                  'text': text,
+                  'parse_mode': 'HTML'  # Включаем поддержку HTML-форматирования
+              }
               try:
                   requests.post(url, data=payload)
               except Exception as e:
@@ -109,6 +113,11 @@ jobs:
           print('✅ Прошло достаточно времени с последнего успешного обновления')
           print('🚀 Запускаем обновление резюме...')
           
+          # Уведомляем о старте процесса обновления
+          current_time = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+          info_msg = f'🚀 <b>Запуск обновления резюме</b>\n\n🕒 Время: {current_time}'
+          send_telegram_message(info_msg)
+          
           # Запускаем скрипт напрямую
           import subprocess
           print('🔄 Выполняем скрипт обновления резюме')
@@ -120,8 +129,9 @@ jobs:
               print(msg)
               # Сообщение отправит сам скрипт update_resume.py
           except subprocess.CalledProcessError as e:
-              msg = f'❌ Ошибка при выполнении скрипта: {str(e)}'
-              print(msg)
+              current_time = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+              msg = f'❌ Ошибка при выполнении скрипта: {str(e)}\n\n🕒 Время: {current_time}'
+              print(f'❌ Ошибка при выполнении скрипта: {str(e)}')
               send_telegram_message(msg)
               exit(1)
           "

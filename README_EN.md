@@ -168,7 +168,7 @@ you can temporarily provide an `access_token` directly via `HH_ACCESS_TOKEN`.
 
 💼 Resume ID: <code>123456</code>
 
-🕒 Updated: 26.03.2024 16:45:30
+🕒 Updated: 29.03.2024 21:45:30
 ```
 
 ### Update Error
@@ -179,7 +179,7 @@ you can temporarily provide an `access_token` directly via `HH_ACCESS_TOKEN`.
 ⚠️ Status: 400
 📝 Response: {"errors": [{"type": "error", "value": "Resume not found"}]}
 
-🕒 Updated: 26.03.2024 16:45:30
+🕒 Updated: 29.03.2024 21:45:30
 ```
 
 ## ❓ Frequently Asked Questions
