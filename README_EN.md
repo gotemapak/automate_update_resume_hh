@@ -133,6 +133,8 @@ The script is checked every 30 minutes, but runs only if:
 
 This prevents "Can't publish resume: too often" errors and ensures efficient updating.
 
+> **Note:** This is implemented using the workflow file `.github/workflows/check_and_update_resume.yml`, which runs on schedule and verifies if a resume update is needed.
+
 Required secrets in GitHub:
 
 | Secret Name         | Description                  |
