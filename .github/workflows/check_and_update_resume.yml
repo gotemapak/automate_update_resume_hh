@@ -55,38 +55,17 @@ jobs:
           # Получаем информацию о последних workflow runs
           token = os.environ.get('GITHUB_TOKEN')
           repo = os.environ.get('GITHUB_REPOSITORY')
-          workflow_name = 'Update HH Resume'  # Название основного workflow для поиска
+          
+          # Ищем историю запусков текущего workflow (check_and_update_resume.yml)
+          # Это позволит найти последние успешные обновления
           
           headers = {
               'Authorization': f'token {token}',
               'Accept': 'application/vnd.github.v3+json'
           }
           
-          url = f'https://api.github.com/repos/{repo}/actions/workflows'
-          response = requests.get(url, headers=headers)
-          
-          if response.status_code != 200:
-              print(f'❌ Ошибка при получении списка workflows: {response.status_code}')
-              print(response.text)
-              exit(1)
-              
-          workflows = response.json().get('workflows', [])
-          update_workflow_id = None
-          
-          for workflow in workflows:
-              if workflow['name'] == workflow_name:
-                  update_workflow_id = workflow['id']
-                  break
-          
-          if not update_workflow_id:
-              print(f'❌ Не найден workflow с именем \"{workflow_name}\"')
-              update_workflow_id = None  # Будем искать по любому workflow с успешным обновлением
-          
-          # Получаем историю запусков
           url = f'https://api.github.com/repos/{repo}/actions/runs'
           params = {'per_page': 30}  # Получаем последние 30 запусков
-          if update_workflow_id:
-              params['workflow_id'] = update_workflow_id
               
           response = requests.get(url, headers=headers, params=params)
           
@@ -95,12 +74,12 @@ jobs:
               print(response.text)
               exit(1)
           
-          # Находим последний успешный запуск
+          # Находим последний успешный запуск с обновлением резюме
           runs = response.json().get('workflow_runs', [])
+          # Ищем запуски, в логах которых есть сообщение об успешном обновлении резюме
           successful_runs = [
               run for run in runs 
-              if run['conclusion'] == 'success' and
-              (update_workflow_id is None or run['workflow_id'] == update_workflow_id)
+              if run['conclusion'] == 'success'
           ]
           
           min_interval = timedelta(hours=4, minutes=1)  # 4 часа и 1 минута
@@ -130,39 +109,19 @@ jobs:
           print('✅ Прошло достаточно времени с последнего успешного обновления')
           print('🚀 Запускаем обновление резюме...')
           
-          # Запускаем workflow вручную через API
-          if update_workflow_id:
-              dispatch_url = f'https://api.github.com/repos/{repo}/actions/workflows/{update_workflow_id}/dispatches'
-              dispatch_data = {'ref': os.environ.get('GITHUB_REF', 'main')}
-              
-              response = requests.post(dispatch_url, headers=headers, json=dispatch_data)
-              
-              if response.status_code == 204:
-                  msg = '✅ Запущен процесс обновления резюме'
-                  print(msg)
-                  send_telegram_message(msg)
-              else:
-                  msg = f'❌ Ошибка при запуске обновления: {response.status_code} {response.text}'
-                  print(msg)
-                  send_telegram_message(msg)
-                  exit(1)
-          else:
-              # Если не нашли workflow для запуска, запускаем скрипт напрямую
-              import subprocess
-              print('⚠️ Не найден workflow для запуска, выполняем скрипт напрямую')
-              
-              try:
-                  # Устанавливаем зависимости скрипта перед запуском
-                  subprocess.run(['pip', 'install', '-r', 'requirements.txt'], check=True)
-                  
-                  # Запускаем основной скрипт
-                  result = subprocess.run(['python', 'update_resume.py'], check=True)
-                  msg = '✅ Скрипт обновления успешно выполнен'
-                  print(msg)
-                  # Сообщение отправит сам скрипт update_resume.py
-              except subprocess.CalledProcessError as e:
-                  msg = f'❌ Ошибка при выполнении скрипта: {str(e)}'
-                  print(msg)
-                  send_telegram_message(msg)
-                  exit(1)
+          # Запускаем скрипт напрямую
+          import subprocess
+          print('🔄 Выполняем скрипт обновления резюме')
+          
+          try:
+              # Запускаем основной скрипт
+              result = subprocess.run(['python', 'update_resume.py'], check=True)
+              msg = '✅ Скрипт обновления успешно выполнен'
+              print(msg)
+              # Сообщение отправит сам скрипт update_resume.py
+          except subprocess.CalledProcessError as e:
+              msg = f'❌ Ошибка при выполнении скрипта: {str(e)}'
+              print(msg)
+              send_telegram_message(msg)
+              exit(1)
           "
