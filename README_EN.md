@@ -133,7 +133,7 @@ The script is checked every 30 minutes, but runs only if:
 
 This prevents "Can't publish resume: too often" errors and ensures efficient updating.
 
-> **Note:** This is implemented using the workflow file `.github/workflows/check_and_update_resume.yml`, which runs on schedule and verifies if a resume update is needed.
+> **Note:** This is implemented using the workflow file `.github/workflows/check_and_update_resume.yml`, which runs on schedule and verifies if a resume update is needed. When conditions are met, the script directly executes the update, without using intermediate workflows.
 
 Required secrets in GitHub:
 
@@ -185,7 +185,7 @@ you can temporarily provide an `access_token` directly via `HH_ACCESS_TOKEN`.
 ## ❓ Frequently Asked Questions
 
 ### Q: How often is the resume updated?
-A: By default, every 4 hours via GitHub Actions. This matches HH.ru's free tier limitation - on a free account, you can only update your resume once every 4 hours. If you try to update it more frequently, HH.ru will return an error.
+A: By default, every 4 hours via GitHub Actions. This matches HH.ru's free tier limitation - on a free account, you can only update your resume once every 4 hours. If you try to update it more frequently, HH.ru will return an error. The system checks for update eligibility every 30 minutes and triggers the process only if at least 4 hours and 1 minute have passed since the last successful update.
 
 ### Q: Do I need to update tokens?
 A: The `refresh_token` is valid for 30 days. The script will automatically notify you when tokens need to be updated. It's advisable to update `HH_ACCESS_TOKEN` once a week.
