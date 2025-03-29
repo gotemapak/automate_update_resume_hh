@@ -1,8 +1,8 @@
 name: Update HH Resume
 
 on:
-  schedule:
-    - cron: "0 */4 * * *"  # Run every 4 hours
+  # schedule:
+  #   - cron: "0 */4 * * *"  # Run every 4 hours
   workflow_dispatch:       # Manual trigger option
 
 jobs:

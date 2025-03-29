@@ -117,14 +117,21 @@ python update_resume.py
 
 ## 📆 GitHub Actions (if using)
 
-The included workflow runs every 4 hours and can also be triggered manually:
+The automatic update system takes into account HeadHunter's limitation (no more than once every 4 hours):
 
 ```yaml
 on:
   schedule:
-    - cron: "0 */4 * * *"
+    - cron: "*/30 * * * *"  # Check every 30 minutes
   workflow_dispatch:
 ```
+
+### 🔄 Smart Triggering
+The script is checked every 30 minutes, but runs only if:
+1. At least 4 hours and 1 minute have passed since the last successful update
+2. Resume update is required
+
+This prevents "Can't publish resume: too often" errors and ensures efficient updating.
 
 Required secrets in GitHub:
 
@@ -137,6 +144,7 @@ Required secrets in GitHub:
 | `HH_ACCESS_TOKEN`   | Backup access token*         |
 | `TG_BOT_TOKEN`      | Your Telegram bot token      |
 | `TG_CHAT_ID`        | Chat ID for notifications    |
+| `GITHUB_TOKEN`      | Added automatically          |
 
 \* Used when "token not expired" error occurs
 
