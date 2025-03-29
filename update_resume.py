@@ -1,6 +1,7 @@
 import requests
 import os
 from dotenv import load_dotenv
+from datetime import datetime
 
 load_dotenv()
 
@@ -11,7 +12,11 @@ def send_telegram_message(text):
         print("ℹ️ Telegram переменные не заданы — пропускаем отправку.")
         return
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    payload = {"chat_id": chat_id, "text": text}
+    payload = {
+        "chat_id": chat_id, 
+        "text": text,
+        "parse_mode": "HTML"  # Включаем поддержку HTML-форматирования
+    }
     try:
         requests.post(url, data=payload)
     except Exception as e:
@@ -29,15 +34,17 @@ def get_tokens_if_needed():
         "code": os.getenv("HH_AUTH_CODE")
     }
     response = requests.post(url, data=data)
+    current_time = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+    
     if response.ok:
         tokens = response.json()
         print("✅ Access token:", tokens["access_token"])
         print("🔁 Refresh token:", tokens["refresh_token"])
-        send_telegram_message("✅ Получены новые токены (access + refresh).")
+        send_telegram_message(f"✅ Получены новые токены (access + refresh).\n\n🕒 Время: {current_time}")
     else:
         print("❌ Ошибка при получении токенов:")
         print(response.status_code, response.text)
-        send_telegram_message(f"❌ Ошибка при получении токенов: {response.text}")
+        send_telegram_message(f"❌ Ошибка при получении токенов: {response.text}\n\n🕒 Время: {current_time}")
 
 def list_resumes_if_token():
     access_token = os.getenv("HH_ACCESS_TOKEN")
@@ -91,24 +98,30 @@ def update_resume(token, resume_id):
     url = f"https://api.hh.ru/resumes/{resume_id}/publish"
     headers = {"Authorization": f"Bearer {token}"}
     response = requests.post(url, headers=headers)
+    
+    # Получаем текущую дату и время
+    current_time = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+    
     if response.status_code == 204:
-        msg = f"✅ Резюме {resume_id} обновлено успешно."
-        print(msg)
+        msg = f"✅ Резюме <b>{resume_id}</b> обновлено успешно.\n\n💼 ID резюме: <code>{resume_id}</code>\n\n🕒 Обновлено: {current_time}"
+        print(f"✅ Резюме {resume_id} обновлено успешно.")
         send_telegram_message(msg)
     else:
-        msg = f"❌ Ошибка при обновлении резюме {resume_id}: {response.status_code} {response.text}"
-        print(msg)
+        msg = f"❌ Ошибка при обновлении резюме <b>{resume_id}</b>:\n\n💼 ID резюме: <code>{resume_id}</code>\n⚠️ Статус: {response.status_code}\n📝 Ответ: {response.text}\n\n🕒 Обновлено: {current_time}"
+        print(f"❌ Ошибка при обновлении резюме {resume_id}: {response.status_code} {response.text}")
         send_telegram_message(msg)
 
 def update_resumes_if_possible():
+    current_time = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+    
     try:
         access_token = get_access_token()
     except Exception as e:
         print(f"❌ Ошибка при получении access_token: {str(e)}")
         access_token = os.getenv("HH_ACCESS_TOKEN")
         if not access_token:
-            error_msg = "❌ Нет access_token и не удалось получить его через refresh_token."
-            print(error_msg)
+            error_msg = f"❌ Нет access_token и не удалось получить его через refresh_token.\n\n🕒 Время: {current_time}"
+            print("❌ Нет access_token и не удалось получить его через refresh_token.")
             send_telegram_message(error_msg)
             return
         else:
@@ -117,7 +130,7 @@ def update_resumes_if_possible():
     resume_ids = os.getenv("HH_RESUME_IDS")
     if not resume_ids:
         print("❌ Переменная HH_RESUME_IDS не найдена.")
-        send_telegram_message("❌ Переменная HH_RESUME_IDS не найдена.")
+        send_telegram_message(f"❌ Переменная HH_RESUME_IDS не найдена.\n\n🕒 Время: {current_time}")
         return
     for rid in resume_ids.split(","):
         rid = rid.strip()
