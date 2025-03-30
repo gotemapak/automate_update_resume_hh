@@ -113,17 +113,8 @@ jobs:
           print('✅ Прошло достаточно времени с последнего успешного обновления')
           print('🚀 Запускаем обновление резюме...')
           
-          # Уведомляем о старте процесса обновления
-          # Используем базовый способ форматирования без специальных символов
-          today = datetime.now()
-          day = str(today.day).zfill(2)
-          month = str(today.month).zfill(2)
-          year = today.year
-          hour = str(today.hour).zfill(2)
-          minute = str(today.minute).zfill(2)
-          second = str(today.second).zfill(2)
-          current_time = f"{day}.{month}.{year} {hour}:{minute}:{second}"
-          info_msg = f'🚀 <b>Запуск обновления резюме</b>\n\n🕒 Время: {current_time}'
+          # Уведомляем о старте процесса обновления без даты/времени
+          info_msg = '🚀 <b>Запуск обновления резюме</b>'
           send_telegram_message(info_msg)
           
           # Запускаем скрипт напрямую
@@ -137,16 +128,7 @@ jobs:
               print(msg)
               # Сообщение отправит сам скрипт update_resume.py
           except subprocess.CalledProcessError as e:
-              # Используем такой же способ форматирования даты для сообщения об ошибке
-              today = datetime.now()
-              day = str(today.day).zfill(2)
-              month = str(today.month).zfill(2)
-              year = today.year
-              hour = str(today.hour).zfill(2)
-              minute = str(today.minute).zfill(2)
-              second = str(today.second).zfill(2)
-              current_time = f"{day}.{month}.{year} {hour}:{minute}:{second}"
-              msg = f'❌ Ошибка при выполнении скрипта: {str(e)}\n\n🕒 Время: {current_time}'
+              msg = f'❌ Ошибка при выполнении скрипта: {str(e)}'
               print(f'❌ Ошибка при выполнении скрипта: {str(e)}')
               send_telegram_message(msg)
               exit(1)
