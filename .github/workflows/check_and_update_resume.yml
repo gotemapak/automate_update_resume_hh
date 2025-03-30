@@ -114,7 +114,7 @@ jobs:
           print('🚀 Запускаем обновление резюме...')
           
           # Уведомляем о старте процесса обновления
-          current_time = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+          current_time = datetime.now().strftime("%%d.%%m.%%Y %%H:%%M:%%S")
           info_msg = f'🚀 <b>Запуск обновления резюме</b>\n\n🕒 Время: {current_time}'
           send_telegram_message(info_msg)
           
@@ -129,7 +129,7 @@ jobs:
               print(msg)
               # Сообщение отправит сам скрипт update_resume.py
           except subprocess.CalledProcessError as e:
-              current_time = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+              current_time = datetime.now().strftime("%%d.%%m.%%Y %%H:%%M:%%S")
               msg = f'❌ Ошибка при выполнении скрипта: {str(e)}\n\n🕒 Время: {current_time}'
               print(f'❌ Ошибка при выполнении скрипта: {str(e)}')
               send_telegram_message(msg)
