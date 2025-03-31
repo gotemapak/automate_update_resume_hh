@@ -91,6 +91,14 @@ jobs:
               if time_since_last < min_interval:
                   exit(0)
           
+          # Проверяем наличие критических переменных окружения
+          required_vars = ['HH_CLIENT_ID', 'HH_CLIENT_SECRET', 'HH_REFRESH_TOKEN', 'HH_RESUME_IDS']
+          missing_vars = [var for var in required_vars if not os.environ.get(var)]
+          if missing_vars:
+              print(f'Missing required environment variables: {", ".join(missing_vars)}')
+              send_telegram_message(f'❌ Отсутствуют обязательные переменные окружения: {", ".join(missing_vars)}')
+              exit(1)
+          
           send_telegram_message('🚀 <b>Запуск обновления резюме</b>')
           
           import subprocess
@@ -101,7 +109,17 @@ jobs:
                   capture_output=True,
                   text=True
               )
+              # Логируем вывод скрипта
+              if result.stdout:
+                  print(result.stdout)
+              if result.stderr:
+                  print(result.stderr)
           except subprocess.CalledProcessError as e:
+              print(f'Script error: {str(e)}')
+              print('Script output:')
+              print(e.stdout)
+              print('Script errors:')
+              print(e.stderr)
               send_telegram_message(f'❌ Ошибка при выполнении скрипта: {str(e)}')
               exit(1)
           "
