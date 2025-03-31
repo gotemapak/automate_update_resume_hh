@@ -36,7 +36,7 @@ jobs:
           import requests
           import os
           import time
-          from datetime import datetime, timedelta
+          from datetime import datetime, timedelta, timezone
           
           # Функция для отправки сообщений в Telegram
           def send_telegram_message(text):
@@ -60,9 +60,7 @@ jobs:
           token = os.environ.get('GITHUB_TOKEN')
           repo = os.environ.get('GITHUB_REPOSITORY')
           
-          # Ищем историю запусков текущего workflow (check_and_update_resume.yml)
-          # Это позволит найти последние успешные обновления
-          
+          # Ищем историю запусков текущего workflow
           headers = {
               'Authorization': f'token {token}',
               'Accept': 'application/vnd.github.v3+json'
@@ -80,20 +78,21 @@ jobs:
           
           # Находим последний успешный запуск с обновлением резюме
           runs = response.json().get('workflow_runs', [])
-          # Ищем запуски, в логах которых есть сообщение об успешном обновлении резюме
           successful_runs = [
               run for run in runs 
               if run['conclusion'] == 'success'
           ]
           
           min_interval = timedelta(hours=4, minutes=1)  # 4 часа и 1 минута
-          now = datetime.utcnow()
+          now = datetime.now(timezone.utc)  # Используем timezone-aware datetime
           
           if successful_runs:
               last_success = successful_runs[0]
+              # GitHub API возвращает время в UTC
               last_success_time = datetime.strptime(
-                  last_success['updated_at'], '%Y-%m-%dT%H:%M:%SZ'
-              )
+                  last_success['updated_at'], 
+                  '%Y-%m-%dT%H:%M:%SZ'
+              ).replace(tzinfo=timezone.utc)
               
               time_since_last = now - last_success_time
               
@@ -102,15 +101,24 @@ jobs:
                   elapsed_minutes = time_since_last.total_seconds() / 60
                   remaining_minutes = (min_interval.total_seconds() / 60) - elapsed_minutes
                   
-                  msg = f'⏳ Последнее успешное обновление было {elapsed_minutes:.1f} минут назад. '
-                  msg += f'Нужно подождать еще {remaining_minutes:.1f} минут.'
+                  print(f'⏳ Информация о времени:')
+                  print(f'- Текущее время (UTC): {now}')
+                  print(f'- Последнее обновление (UTC): {last_success_time}')
+                  print(f'- Прошло минут: {elapsed_minutes:.1f}')
+                  print(f'- Осталось ждать: {remaining_minutes:.1f} минут')
                   
-                  print(msg)
                   # Не отправляем сообщение в Telegram для экономии уведомлений
                   exit(0)  # Выходим без ошибки, но и без запуска обновления
+          else:
+              print('ℹ️ Не найдено предыдущих успешных запусков')
           
           # Если дошли сюда, значит прошло достаточно времени или нет успешных запусков
           print('✅ Прошло достаточно времени с последнего успешного обновления')
+          print(f'- Текущее время (UTC): {now}')
+          if successful_runs:
+              print(f'- Последнее обновление (UTC): {last_success_time}')
+              print(f'- Прошло минут: {time_since_last.total_seconds() / 60:.1f}')
+          
           print('🚀 Запускаем обновление резюме...')
           
           # Уведомляем о старте процесса обновления без даты/времени
