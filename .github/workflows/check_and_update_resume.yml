@@ -2,7 +2,7 @@ name: Check and Update HH Resume
 
 on:
   schedule:
-    - cron: "*/30 * * * *"  # Проверка каждые 30 минут
+    - cron: "1 */4 * * *"  # Запуск на 1-й минуте каждые 4 часа
   workflow_dispatch:        # Возможность ручного запуска
 
 jobs:
