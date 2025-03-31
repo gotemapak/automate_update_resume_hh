@@ -122,18 +122,22 @@ The automatic update system takes into account HeadHunter's limitation (no more 
 ```yaml
 on:
   schedule:
-    - cron: "*/30 * * * *"  # Check every 30 minutes
+    - cron: "1 */4 * * *"  # Run at minute 1 every 4 hours
   workflow_dispatch:
 ```
 
-### 🔄 Smart Triggering
-The script is checked every 30 minutes, but runs only if:
-1. At least 4 hours and 1 minute have passed since the last successful update
-2. Resume update is required
+### 🔄 Scheduled Updating
+The script runs exactly once every 4 hours (at the first minute of each 4th hour), which aligns with HeadHunter API limitations. Schedule:
+- 00:01
+- 04:01
+- 08:01
+- 12:01
+- 16:01
+- 20:01
 
 This prevents "Can't publish resume: too often" errors and ensures efficient updating.
 
-> **Note:** This is implemented using the workflow file `.github/workflows/check_and_update_resume.yml`, which runs on schedule and verifies if a resume update is needed. When conditions are met, the script directly executes the update, without using intermediate workflows.
+> **Note:** This is implemented using the workflow file `.github/workflows/check_and_update_resume.yml`, which runs on the defined schedule to update resumes.
 
 Required secrets in GitHub:
 
@@ -165,27 +169,19 @@ you can temporarily provide an `access_token` directly via `HH_ACCESS_TOKEN`.
 ### Successful Update
 ```
 ✅ Resume <b>123456</b> updated successfully.
-
-💼 Resume ID: <code>123456</code>
-
-🕒 Updated: 29.03.2024 21:45:30
 ```
 
 ### Update Error
 ```
-❌ Error updating resume <b>123456</b>:
+Status: ❌ couldn't update resume due to touch_limit_exceeded
 
-💼 Resume ID: <code>123456</code>
-⚠️ Status: 400
-📝 Response: {"errors": [{"type": "error", "value": "Resume not found"}]}
-
-🕒 Updated: 29.03.2024 21:45:30
+Resume: 123456
 ```
 
 ## ❓ Frequently Asked Questions
 
 ### Q: How often is the resume updated?
-A: By default, every 4 hours via GitHub Actions. This matches HH.ru's free tier limitation - on a free account, you can only update your resume once every 4 hours. If you try to update it more frequently, HH.ru will return an error. The system checks for update eligibility every 30 minutes and triggers the process only if at least 4 hours and 1 minute have passed since the last successful update.
+A: Every 4 hours and 1 minute via GitHub Actions (00:01, 04:01, 08:01, 12:01, 16:01, 20:01 UTC). This matches HH.ru's free tier limitation - on a free account, you can only update your resume once every 4 hours. If you try to update it more frequently, HH.ru will return an error.
 
 ### Q: Do I need to update tokens?
 A: The `refresh_token` is valid for 30 days. The script will automatically notify you when tokens need to be updated. It's advisable to update `HH_ACCESS_TOKEN` once a week.
