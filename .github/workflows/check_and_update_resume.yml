@@ -95,8 +95,8 @@ jobs:
           required_vars = ['HH_CLIENT_ID', 'HH_CLIENT_SECRET', 'HH_REFRESH_TOKEN', 'HH_RESUME_IDS']
           missing_vars = [var for var in required_vars if not os.environ.get(var)]
           if missing_vars:
-              print(f'Missing required environment variables: {", ".join(missing_vars)}')
-              send_telegram_message(f'❌ Отсутствуют обязательные переменные окружения: {", ".join(missing_vars)}')
+              print("Missing required environment variables:", ", ".join(missing_vars))
+              send_telegram_message("❌ Отсутствуют обязательные переменные окружения: " + ", ".join(missing_vars))
               exit(1)
           
           send_telegram_message('🚀 <b>Запуск обновления резюме</b>')
