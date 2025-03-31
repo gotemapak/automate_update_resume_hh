@@ -131,13 +131,20 @@ jobs:
           
           # Добавляем отладочную информацию
           print('🔍 Проверяем переменные окружения:')
-          print(f'HH_CLIENT_ID: {"*" * len(os.environ.get("HH_CLIENT_ID", ""))}')
-          print(f'HH_CLIENT_SECRET: {"*" * len(os.environ.get("HH_CLIENT_SECRET", ""))}')
-          print(f'HH_REFRESH_TOKEN: {"*" * len(os.environ.get("HH_REFRESH_TOKEN", ""))}')
-          print(f'HH_RESUME_IDS: {os.environ.get("HH_RESUME_IDS", "не задан")}')
-          print(f'HH_ACCESS_TOKEN: {"*" * len(os.environ.get("HH_ACCESS_TOKEN", ""))}')
-          print(f'TG_BOT_TOKEN: {"*" * len(os.environ.get("TG_BOT_TOKEN", ""))}')
-          print(f'TG_CHAT_ID: {os.environ.get("TG_CHAT_ID", "не задан")}')
+          client_id = os.environ.get("HH_CLIENT_ID", "")
+          print(f'HH_CLIENT_ID: {"*" * len(client_id)}')
+          client_secret = os.environ.get("HH_CLIENT_SECRET", "")
+          print(f'HH_CLIENT_SECRET: {"*" * len(client_secret)}')
+          refresh_token = os.environ.get("HH_REFRESH_TOKEN", "")
+          print(f'HH_REFRESH_TOKEN: {"*" * len(refresh_token)}')
+          resume_ids = os.environ.get("HH_RESUME_IDS", "не задан")
+          print(f'HH_RESUME_IDS: {resume_ids}')
+          access_token = os.environ.get("HH_ACCESS_TOKEN", "")
+          print(f'HH_ACCESS_TOKEN: {"*" * len(access_token)}')
+          bot_token = os.environ.get("TG_BOT_TOKEN", "")
+          print(f'TG_BOT_TOKEN: {"*" * len(bot_token)}')
+          chat_id = os.environ.get("TG_CHAT_ID", "не задан")
+          print(f'TG_CHAT_ID: {chat_id}')
           
           try:
               # Запускаем основной скрипт с выводом stdout и stderr
