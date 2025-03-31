@@ -99,17 +99,21 @@ def update_resume(token, resume_id):
     headers = {"Authorization": f"Bearer {token}"}
     response = requests.post(url, headers=headers)
     
-    # Получаем текущую дату и время
-    current_time = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
-    
     if response.status_code == 204:
-        msg = f"✅ Резюме <b>{resume_id}</b> обновлено успешно.\n\n💼 ID резюме: <code>{resume_id}</code>\n\n🕒 Обновлено: {current_time}"
+        msg = f"✅ Резюме <b>{resume_id}</b> обновлено успешно."
         print(f"✅ Резюме {resume_id} обновлено успешно.")
         send_telegram_message(msg)
     else:
-        msg = f"❌ Ошибка при обновлении резюме <b>{resume_id}</b>:\n\n💼 ID резюме: <code>{resume_id}</code>\n⚠️ Статус: {response.status_code}\n📝 Ответ: {response.text}\n\n🕒 Обновлено: {current_time}"
-        print(f"❌ Ошибка при обновлении резюме {resume_id}: {response.status_code} {response.text}")
-        send_telegram_message(msg)
+        try:
+            error_data = response.json()
+            error_value = error_data.get('errors', [{}])[0].get('value', 'неизвестная ошибка')
+            msg = f"Статус: ❌ не смог обновить резюме из-за {error_value}\n\nРезюме: {resume_id}"
+            print(f"❌ Ошибка при обновлении резюме {resume_id}: {error_value}")
+            send_telegram_message(msg)
+        except Exception as e:
+            msg = f"Статус: ❌ не смог обновить резюме (ошибка обработки ответа)\n\nРезюме: {resume_id}"
+            print(f"❌ Ошибка при обновлении резюме {resume_id}: {response.text}")
+            send_telegram_message(msg)
 
 def update_resumes_if_possible():
     current_time = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
