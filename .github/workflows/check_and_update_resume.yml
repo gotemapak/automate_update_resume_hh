@@ -121,15 +121,40 @@ jobs:
           import subprocess
           print('🔄 Выполняем скрипт обновления резюме')
           
+          # Добавляем отладочную информацию
+          print('🔍 Проверяем переменные окружения:')
+          print(f'HH_CLIENT_ID: {"*" * len(os.environ.get("HH_CLIENT_ID", ""))}')
+          print(f'HH_CLIENT_SECRET: {"*" * len(os.environ.get("HH_CLIENT_SECRET", ""))}')
+          print(f'HH_REFRESH_TOKEN: {"*" * len(os.environ.get("HH_REFRESH_TOKEN", ""))}')
+          print(f'HH_RESUME_IDS: {os.environ.get("HH_RESUME_IDS", "не задан")}')
+          print(f'HH_ACCESS_TOKEN: {"*" * len(os.environ.get("HH_ACCESS_TOKEN", ""))}')
+          print(f'TG_BOT_TOKEN: {"*" * len(os.environ.get("TG_BOT_TOKEN", ""))}')
+          print(f'TG_CHAT_ID: {os.environ.get("TG_CHAT_ID", "не задан")}')
+          
           try:
-              # Запускаем основной скрипт
-              result = subprocess.run(['python', 'update_resume.py'], check=True)
+              # Запускаем основной скрипт с выводом stdout и stderr
+              result = subprocess.run(
+                  ['python', 'update_resume.py'],
+                  check=True,
+                  capture_output=True,
+                  text=True
+              )
+              print('📝 Вывод скрипта:')
+              print(result.stdout)
+              if result.stderr:
+                  print('⚠️ Ошибки скрипта:')
+                  print(result.stderr)
               msg = '✅ Скрипт обновления успешно выполнен'
               print(msg)
               # Сообщение отправит сам скрипт update_resume.py
           except subprocess.CalledProcessError as e:
               msg = f'❌ Ошибка при выполнении скрипта: {str(e)}'
               print(f'❌ Ошибка при выполнении скрипта: {str(e)}')
+              print('📝 Вывод скрипта:')
+              print(e.stdout)
+              if e.stderr:
+                  print('⚠️ Ошибки скрипта:')
+                  print(e.stderr)
               send_telegram_message(msg)
               exit(1)
           "
