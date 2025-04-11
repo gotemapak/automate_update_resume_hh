@@ -93,12 +93,18 @@ python update_resume.py
 1. Go to [dev.hh.ru/admin](https://dev.hh.ru/admin)
 2. Create a new application
 3. Get your `client_id` and `client_secret`
-4. Add redirect URI to your app: `http://localhost:8080`
-5. Get the `code` via OAuth:
-   - Open in browser: `https://hh.ru/oauth/authorize?response_type=code&client_id=YOUR_CLIENT_ID&redirect_uri=http://localhost:8080`
-   - After authorization, you'll get the `code` in the URL
-6. Add the received `code` to `.env` as `HH_AUTH_CODE`
-7. Run the script - it will automatically get `access_token` and `refresh_token`
+4. In application settings, add Redirect URI: `https://google.com`
+5. Run the token retrieval script:
+   ```bash
+   python get_new_tokens.py
+   ```
+6. Follow the console instructions:
+   - Open the provided link in your browser
+   - After authorization, you'll be redirected to Google
+   - Copy the `code` parameter value from the URL
+   - Paste the code into the console
+7. The script will display new `access_token` and `refresh_token`
+8. Add the received tokens to `.env` or GitHub Actions secrets
 
 ### 2. Getting Resume IDs
 
@@ -194,6 +200,12 @@ A: Check that:
 
 ### Q: Why do I get a "token not expired" error?
 A: The HeadHunter API won't issue a new access_token via refresh_token if the old token is still valid. In this case, the script automatically uses the `HH_ACCESS_TOKEN` from environment variables as a backup.
+
+### Q: Why do I get a "bad_authorization" error?
+A: This error means your access tokens have expired or become invalid. To resolve:
+1. Run `python get_new_tokens.py`
+2. Get new tokens by following the instructions
+3. Update `HH_ACCESS_TOKEN` and `HH_REFRESH_TOKEN` in GitHub Actions secrets
 
 ---
 

@@ -85,12 +85,18 @@ python update_resume.py
 1. Перейдите на [dev.hh.ru/admin](https://dev.hh.ru/admin)
 2. Создайте новое приложение
 3. Получите `client_id` и `client_secret`
-4. Добавьте в приложение redirect URI: `http://localhost:8080`
-5. Получите `code` через OAuth:
-   - Откройте в браузере: `https://hh.ru/oauth/authorize?response_type=code&client_id=YOUR_CLIENT_ID&redirect_uri=http://localhost:8080`
-   - После авторизации вы получите `code` в URL
-6. Добавьте полученный `code` в `.env` как `HH_AUTH_CODE`
-7. Запустите скрипт - он автоматически получит `access_token` и `refresh_token`
+4. В настройках приложения добавьте Redirect URI: `https://google.com`
+5. Запустите скрипт для получения токенов:
+   ```bash
+   python get_new_tokens.py
+   ```
+6. Следуйте инструкциям в консоли:
+   - Откройте предложенную ссылку в браузере
+   - После авторизации вы будете перенаправлены на Google
+   - Скопируйте значение параметра `code` из URL
+   - Вставьте код в консоль
+7. Скрипт выведет новые `access_token` и `refresh_token`
+8. Добавьте полученные токены в `.env` или секреты GitHub Actions
 
 ### 2. Получение ID резюме
 
@@ -183,8 +189,11 @@ A: Проверьте, что:
 2. У бота есть права на отправку сообщений
 3. Правильно указаны `TG_BOT_TOKEN` и `TG_CHAT_ID`
 
-### Q: Почему появляется ошибка "token not expired"?
-A: API HeadHunter не выдает новый access_token через refresh_token, если старый токен еще действителен. В этом случае скрипт автоматически использует `HH_ACCESS_TOKEN` из переменных окружения как резервный вариант.
+### Q: Почему появляется ошибка "bad_authorization"?
+A: Эта ошибка означает, что токены доступа истекли или стали недействительными. Для решения:
+1. Запустите `python get_new_tokens.py`
+2. Получите новые токены, следуя инструкциям
+3. Обновите `HH_ACCESS_TOKEN` и `HH_REFRESH_TOKEN` в секретах GitHub Actions
 
 ---
 
